@@ -12,13 +12,26 @@ def scrape(search_term, num_of_articles):
             soup = BeautifulSoup(response.text, 'html.parser')
             # print(soup)
             article_list = soup.select('.card__details')
-            for each in article_list[0:2]:
-                article_data = {
-                    'title': each.select_one('.card__title').text,
-                    'category': each.select_one('a').text  ,
-                    'description': each.select_one('.card__desc').text,
-                }
-                articles.append(article_data)
+            if not article_list:
+                break
+            for each in article_list[:num_of_articles]:
+                title = each.select_one('.card__title')
+                category = each.select_one('a')
+                description = each.select_one('.card__desc')
+
+                if title and category and description:
+
+                    article_data = {
+
+                        'title': title.text.strip(),
+                        'category': category.text.strip(),
+                        'description': description.text.strip(),
+                        
+                    }
+                    articles.append(article_data)
+                else:
+                    print('Skipped cause incomplete data')
+            page += 1
         else:
             print('Error ....')
             break
@@ -31,7 +44,6 @@ search_term = 'नेपाल'
 number_of_articles = 30
 
 articles = scrape(search_term, number_of_articles)
-print(articles)
 
-with open('articles.json', 'w') as file:
-    json.dump(articles, file, indent=4)
+with open('articles.json', 'w', encoding='utf-8') as file:
+    json.dump(articles, file, indent=4, ensure_ascii=False)
