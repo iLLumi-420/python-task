@@ -37,13 +37,12 @@ def scrape(search_term, num_of_articles):
                         'description': description.text.strip() if description else '',
                     }
                     new_articles.append(article_data)
-
-
-                last_page += 1
-
+  
         else:
             print('Error occurred while fetching data.')
             break
+
+        last_page += 1
 
     data = {
         'articles' : prev_articles + new_articles,
