@@ -3,60 +3,58 @@ from bs4 import BeautifulSoup
 import json
 
 def scrape(search_term, num_of_articles):
-    articles = []
-    page = get_latest_page()
-    while len(articles)< num_of_articles:
-        url = f'https://www.annapurnapost.com/search?q={search_term}&page={page}'
+    new_articles = []
+    prev_articles = []
+    last_page = 1
+    print(new_articles, 'start')
+
+    try: 
+        with open('articles.json', 'r' , encoding='utf-8') as file:
+            data = json.load(file)
+            prev_articles = data['articles']
+            last_page = data['last_page']
+        print(prev_articles, 'file read')
+    except FileNotFoundError:
+        pass
+
+    while(len(new_articles)< num_of_articles):
+        url = f'https://www.annapurnapost.com/search?q={search_term}&page={last_page}'
         response = requests.get(url)
         if response.status_code == 200:
             soup = BeautifulSoup(response.text, 'html.parser')
-            # print(soup)
             article_list = soup.select('.card__details')
             if not article_list:
                 break
-            for each in article_list[:num_of_articles]:
-                title = each.select_one('.card__title')
-                category = each.select_one('a')
-                description = each.select_one('.card__desc')
-
-                if title and category and description:
+            else:
+                for each in article_list:
+                    title = each.select_one('.card__title')
+                    category = each.select_one('a')
+                    description = each.select_one('.card__desc')
 
                     article_data = {
-
-                        'title': title.text.strip(),
-                        'category': category.text.strip(),
-                        'description': description.text.strip(),
-                        
+                        'title': title.text.strip() if title else '',
+                        'category': category.text.strip() if category else '',
+                        'description': description.text.strip() if description else '',
                     }
-                    articles.append(article_data)
-                else:
-                    print('Skipped cause incomplete data')
-            page += 1
+                    new_articles.append(article_data)
+
+
+                last_page += 1
+
         else:
-            print('Error ....')
+            print('Error occurred while fetching data.')
             break
 
-    save_latest_page(page)
-    return articles[:num_of_articles]
+    data = {
+        'articles' : prev_articles + new_articles,
+        'last_page': last_page,
+    }
+    with open('articles.json', 'w', encoding='utf-8') as file:
+        json.dump(data, file, indent=4, ensure_ascii=False)
 
-def save_latest_page(page):
-    with open('last_page.txt', 'w') as file:
-        file.write(str(page))
-
-def get_latest_page():
-    try:
-        with open('last_page.txt', 'r') as file:
-            page = int(file.read())
-            return page
-    except FileNotFoundError:
-        return 1
-          
-            
 
 search_term = 'नेपाल'
 number_of_articles = 30
 
-articles = scrape(search_term, number_of_articles)
+scrape(search_term, number_of_articles)
 
-with open('articles.json', 'w', encoding='utf-8') as file:
-    json.dump(articles, file, indent=4, ensure_ascii=False)
