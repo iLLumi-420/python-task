@@ -4,7 +4,7 @@ import json
 
 def scrape(search_term, num_of_articles):
     articles = []
-    page = 1
+    page = get_latest_page()
     while len(articles)< num_of_articles:
         url = f'https://www.annapurnapost.com/search?q={search_term}&page={page}'
         response = requests.get(url)
@@ -36,7 +36,20 @@ def scrape(search_term, num_of_articles):
             print('Error ....')
             break
 
+    save_latest_page(page)
     return articles[:num_of_articles]
+
+def save_latest_page(page):
+    with open('last_page.txt', 'w') as file:
+        file.write(str(page))
+
+def get_latest_page():
+    try:
+        with open('last_page.txt', 'r') as file:
+            page = int(file.read())
+            return page
+    except FileNotFoundError:
+        return 1
           
             
 
