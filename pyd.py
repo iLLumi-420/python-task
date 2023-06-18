@@ -1,33 +1,52 @@
 from pydantic import BaseModel, ValidationError, validator
 
 user = {
-        'name': 'Sandeep',
+        'name': 25654,
         'age': 25,
-        'email': 'sandeep@gmail.com'
+        'email': 'sandeep@gmail.com',
+        'gender': 'male',
+        'phone' : '9861601060'
     }
 
 class UserProfile(BaseModel):
     name: str
     age: int
     email: str
+    gender: str
+    phone: str
+    
+    @validator('name', pre=True)
+    def validate_name(cls, name):
+        if not isinstance(name, str):
+            raise ValueError('Name must be string')
+        if len(name) < 4 or len(name) > 50:
+            raise ValueError('Name length should be more than 4 and less than 50')
+        return name
 
     @validator('age')
     def validate_age(cls, age):
         if age < 18 or age > 100 :
             raise ValueError('age should be between 18 and 100')
         return age
-    
-    @validator('name')
-    def validate_name(cls, name):
-        if len(name) < 4 or len(name) > 50:
-            return ValueError('Name length should be more than 4 and less than 50')
-        return name
         
     @validator('email')
     def validate_email(cls, email):
         if '@' not in email or not email.endswith('.com'):
             raise ValueError('Email doesnt follow proper email format')
         return email
+    
+    @validator('gender')
+    def validate_gender(cls, gender):
+        allowed = ['male', 'female', 'other']
+        if gender not in allowed:
+            raise ValueError('Gender not allowed')
+        return gender
+    
+    @validator('phone')
+    def validate_phone(cls, phone):
+        if len(phone) != 10:
+            raise ValueError('Phone no. lemgth should be 10')
+        return phone
         
     
     
@@ -35,7 +54,8 @@ class UserProfile(BaseModel):
 
 try:
     valid = UserProfile(**user)
-    print(valid)
+    if valid:
+        print(valid)
 
 except ValidationError as e:
     print(e)
