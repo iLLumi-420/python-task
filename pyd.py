@@ -1,15 +1,16 @@
 from pydantic import BaseModel, ValidationError, validator
+import re
 
 user = {
-        'name': 25654,
-        'age': 25,
-        'email': 'sandeep@gmail.com',
+        'name': '25654',
+        'age': 25 ,
+        'email': 'san.deep123_@gmail.com',
         'gender': 'male',
         'phone' : '9861601060'
     }
 
 class UserProfile(BaseModel):
-    name: str
+    name: str 
     age: int
     email: str
     gender: str
@@ -31,7 +32,9 @@ class UserProfile(BaseModel):
         
     @validator('email')
     def validate_email(cls, email):
-        if '@' not in email or not email.endswith('.com'):
+        pattern = r"[\w.-]+@[\w-]+\.[\w.]+"
+        match = re.match(pattern, email)
+        if not match:
             raise ValueError('Email doesnt follow proper email format')
         return email
     
