@@ -1,17 +1,21 @@
-from cerberus import Validator, errors
+from cerberus import Validator
 
 schema = {
-    'name' : { 'type': 'string', 'required': True },
+    'name' : { 'type': 'string', 'required': True , 'minlength':4},
     'age': {'type': 'integer', 'min': 18, 'max': 99},
-    'email': {'type': 'string', 'regex': r'\S+@\S+\.\S+', 'required': True}
+    'email': {'type': 'string', 'regex': r'\S+@\S+\.\S+', 'required': True},
+    'phone': { 'type': 'string', 'min': 10, 'max':10 },
+    'gender': { 'type': 'string', 'allowed': ['male', 'female', 'other'], }
 }
 
 validator = Validator(schema)
 
 user_data = {
-    'name' : 'John Doe',
-    'age' : 23,
-    'email': 'johndoe@gmail.com'
+    'name' : 'Joh',
+    'age' : 22,
+    'email': 'johndoe@gmail.com',
+    'phone': '9861601060',
+    'gender': 'male'
 }
 
 is_valid = validator.validate(user_data)
@@ -19,4 +23,5 @@ is_valid = validator.validate(user_data)
 if is_valid:
     print("Data is valid")
 else:
-    print("Data is not valid")
+    for field, error in validator.errors.items():
+        print(field, error)
