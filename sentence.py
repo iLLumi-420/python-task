@@ -27,4 +27,8 @@ def search_word(word):
     indices = index[word]
     return [sentence_list[i] for i in indices]
 
-print(search_word('This'))
+first_word = search_word('This')
+second_word = search_word('Python')
+third_word = search_word('adadda')
+
+print(first_word, second_word, third_word)
